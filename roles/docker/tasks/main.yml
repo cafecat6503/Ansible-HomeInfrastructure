@@ -1,0 +1,44 @@
+- name: Get distribution name
+  shell: echo $(lsb_release -is) | awk '{print tolower($0)}'
+  register: distribution_name
+  changed_when: False
+  tags: docker
+
+- name: Get distribution release name
+  shell: echo $(lsb_release -cs) | awk '{print tolower($0)}'
+  register: release_name
+  changed_when: False
+  tags: docker
+
+- name: Install dependency package
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - lsb-release
+      - gnupg
+    state: present
+  tags: docker
+
+- name: Add Apt key
+  ansible.builtin.apt_key:
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    url: https://download.docker.com/linux/ubuntu/gpg
+    keyring: /etc/apt/trusted.gpg.d/docker.gpg
+  tags: docker
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: deb https://download.docker.com/linux/{{ distribution_name.stdout }} {{ release_name.stdout }} stable
+    state: present
+  tags: docker
+
+- name: Install Docker
+  ansible.builtin.apt:
+    name: 
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+    update_cache: yes
+  tags: docker
