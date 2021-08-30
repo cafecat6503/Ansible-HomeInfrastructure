@@ -1,0 +1,7 @@
+---
+- hosts: docker
+  roles:
+    - docker
+    - docker-compose
+  remote_user: cafecat6503
+  become: yes
