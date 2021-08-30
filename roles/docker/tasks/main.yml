@@ -29,5 +29,5 @@
       - containerd.io
     state: present
     update_cache: yes
-    notify: start_docker
+  notify: start_docker
   tags: docker
