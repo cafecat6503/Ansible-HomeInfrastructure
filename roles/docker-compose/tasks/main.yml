@@ -1,0 +1,25 @@
+---
+- name: Check Docker-compose is aready installed.
+  ansible.builtin.stat:
+    path: "{{ docker_compose_path }}"
+    get_checksum: False
+    get_md5: False
+  register: is_compose_installed
+  changed_when: False
+
+- name: Check Docker-compose version
+  ansible.builtin.command: "{{ docker_compose_path }} --version --short"
+  register: compose_current_version
+  changed_when: false
+  failed_when: false
+  check_mode: no
+  when: is_compose_installed
+
+- name: Download Docker-compose
+  ansible.builtin.get_url:
+    url: "{{ docker_compose_url }}"
+    dest: "{{ docker_compose_path }}"
+    mode: 0755
+  when: >
+    docker_compose_version not in compose_current_version.stdout
+    or not is_compose_installed
